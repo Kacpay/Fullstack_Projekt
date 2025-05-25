@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from models.base import Base
 from routes import auth
+from routes import n_back_result
 from database import engine
 
 # fastapi dev main.py
@@ -11,5 +12,6 @@ from database import engine
 app = FastAPI()
 
 app.include_router(auth.router, prefix='/auth')
+app.include_router(n_back_result.router, prefix='/nback')
 
 Base.metadata.create_all(engine)
