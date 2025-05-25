@@ -1,5 +1,5 @@
 import 'package:client/core/providers/current_user_notifier.dart';
-import 'package:client/features/home/view/pages/n_back_game.dart';
+import 'package:client/features/home/view/pages/n_back_game_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

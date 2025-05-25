@@ -27,7 +27,6 @@ class _SignupPageState extends ConsumerState<SignupPage> {
     emailController.dispose();
     passwordController.dispose();
     super.dispose();
-    formKey.currentState!.validate();
   }
 
   @override
@@ -36,95 +35,101 @@ class _SignupPageState extends ConsumerState<SignupPage> {
 
     ref.listen(authViewmodelProvider, (_, next) {
       next?.when(
-        data: (data) {
+        data: (_) {
           showSnackBar(context, 'Account created successfully! Please login.');
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const LoginPage()),
           );
         },
-        error: (error, st) {showSnackBar(context, error.toString());},
+        error: (error, _) => showSnackBar(context, error.toString()),
         loading: () {},
       );
     });
 
     return Scaffold(
-      appBar: AppBar(),
-      body:
-          isLoading
-              ? const Loader()
-              : Padding(
-                padding: const EdgeInsets.all(15),
-                child: Form(
-                  key: formKey,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text(
-                        'Sign up.',
-                        style: TextStyle(
-                          fontSize: 50,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 30),
-                      CustomField(hintText: 'Name', controller: nameController),
-                      const SizedBox(height: 15),
-                      CustomField(
-                        hintText: 'Email',
-                        controller: emailController,
-                      ),
-                      const SizedBox(height: 15),
-                      CustomField(
-                        hintText: 'Password',
-                        controller: passwordController,
-                        isObscureText: true,
-                      ),
-                      const SizedBox(height: 20),
-                      AuthGradientButton(
-                        buttonText: 'Sing Up',
-                        onTap: () async {
-                          if (formKey.currentState!.validate()) {
-                            await ref
-                                .read(authViewmodelProvider.notifier)
-                                .signUpUser(
-                                  name: nameController.text,
-                                  email: emailController.text,
-                                  password: passwordController.text,
-                                );
-                          }
-                        },
-                      ),
-                      const SizedBox(height: 20),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const LoginPage(),
+      appBar: AppBar(elevation: 0, backgroundColor: Colors.transparent),
+      body: isLoading
+          ? const Loader()
+          : LayoutBuilder(
+              builder: (context, constraints) {
+                return SingleChildScrollView(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+                      child: Form(
+                        key: formKey,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Text(
+                              'Create Account',
+                              style: TextStyle(
+                                fontSize: 36,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                          );
-                        },
-                        child: RichText(
-                          text: TextSpan(
-                            text: 'Already have an account? ',
-                            style: Theme.of(context).textTheme.titleMedium,
-                            children: const [
-                              TextSpan(
-                                text: 'Sign In',
-                                style: TextStyle(
-                                  color: Pallete.gradient2,
-                                  fontWeight: FontWeight.bold,
+                            const SizedBox(height: 24),
+                            CustomField(hintText: 'Name', controller: nameController),
+                            const SizedBox(height: 16),
+                            CustomField(hintText: 'Email', controller: emailController),
+                            const SizedBox(height: 16),
+                            CustomField(
+                              hintText: 'Password',
+                              controller: passwordController,
+                              isObscureText: true,
+                            ),
+                            const SizedBox(height: 28),
+                            AuthGradientButton(
+                              buttonText: 'Sign Up',
+                              onTap: () async {
+                                if (formKey.currentState!.validate()) {
+                                  await ref
+                                      .read(authViewmodelProvider.notifier)
+                                      .signUpUser(
+                                        name: nameController.text,
+                                        email: emailController.text,
+                                        password: passwordController.text,
+                                      );
+                                }
+                              },
+                            ),
+                            const SizedBox(height: 24),
+                            Divider(color: Colors.grey.shade300),
+                            const SizedBox(height: 16),
+                            GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => const LoginPage()),
+                                );
+                              },
+                              child: RichText(
+                                textAlign: TextAlign.center,
+                                text: TextSpan(
+                                  text: 'Already have an account? ',
+                                  style: Theme.of(context).textTheme.titleMedium,
+                                  children: const [
+                                    TextSpan(
+                                      text: 'Sign In',
+                                      style: TextStyle(
+                                        color: Pallete.gradient2,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       ),
-                    ],
+                    ),
                   ),
-                ),
-              ),
+                );
+              },
+            ),
     );
   }
 }
