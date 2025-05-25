@@ -1,11 +1,10 @@
 import 'dart:async';
-import 'package:client/features/home/model/settings_model.dart';
 import 'package:flutter/material.dart';
 import '../../viewmodel/n_back_game_viewmodel.dart';
-import '../../model/today_best_result_storage.dart';
 import '../../model/game_result_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:client/core/providers/current_user_notifier.dart';
+import 'package:client/features/home/repositories/home_local_repository.dart';
 
 class NBackGamePage extends ConsumerStatefulWidget {
   const NBackGamePage({super.key});
@@ -22,6 +21,8 @@ class _NBackGamePageState extends ConsumerState<NBackGamePage> {
   bool positionClicked = false;
   bool letterClicked = false;
 
+  final homeRepo = HomeLocalRepository();
+
   @override
   void initState() {
     super.initState();
@@ -29,7 +30,7 @@ class _NBackGamePageState extends ConsumerState<NBackGamePage> {
   }
 
   Future<void> _initGame() async {
-    final settings = await SettingsModel.load();
+    final settings = await homeRepo.loadSettings();
     debugPrint('Ładowany poziom: ${settings.currentLevel}');
     setState(() {
       viewModel = NBackGameViewModel(level: settings.currentLevel);
@@ -102,13 +103,13 @@ class _NBackGamePageState extends ConsumerState<NBackGamePage> {
       level: viewModel!.level,
     );
     // Testowanie i zapis wyniku
-    final wasSaved = await saveTodayBestResult(result);
+    final wasSaved = await homeRepo.saveTodayBestResult(result);
     if (wasSaved) {
       debugPrint(
         'Dodano wynik: userId=${result.userId}, score=${result.score}, level=${result.level}, submittedAt=${result.submittedAt.toIso8601String()}'
       );
     } else {
-      final todayBest = await getTodayBestResult();
+      final todayBest = await homeRepo.getTodayBestResult();
       debugPrint(
         'Wynik NIE został zapisany (nie był lepszy niż dzisiejszy najlepszy: '
         'level=${todayBest?.level}, score=${todayBest?.score}).'
@@ -117,12 +118,11 @@ class _NBackGamePageState extends ConsumerState<NBackGamePage> {
 
     // --- AKTUALIZACJA POZIOMU ---
     // Załaduj aktualne ustawienia
-    // Przykład z domyślnym SettingsModel:
-    SettingsModel currentSettings = SettingsModel(currentLevel: viewModel!.level);
+    final currentSettings = await homeRepo.loadSettings();
     final updatedSettings = viewModel!.updateLevel(currentSettings);
     debugPrint('Aktualny poziom po grze: ${updatedSettings.currentLevel}');
 
-    await SettingsModel.save(updatedSettings);
+    await homeRepo.saveSettings(updatedSettings);
 
     showDialog(
       context: context,
