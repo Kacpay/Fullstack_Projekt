@@ -1,5 +1,6 @@
 import 'package:client/core/providers/current_user_notifier.dart';
 import 'package:client/features/home/view/pages/n_back_game_page.dart';
+import 'package:client/features/home/view/pages/n_back_stats_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -82,7 +83,12 @@ class HomePage extends ConsumerWidget {
                       textStyle: const TextStyle(fontSize: 18),
                     ),
                     onPressed: () {
-                      // TODO: Przejdź do ekranu statystyk
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const NBackStatsPage(),
+                        ),
+                      );
                     },
                   ),
                 ),

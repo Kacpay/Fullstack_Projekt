@@ -92,3 +92,20 @@ def update_n_back_result(
     db.commit()
     db.refresh(existing_result)
     return existing_result
+
+@router.get("/recent", response_model=list[NBackResultOut])
+def get_recent_n_back_results(
+    db: Session = Depends(get_db),
+    user_dict=Depends(auth_middleware)
+):
+    """
+    Zwraca 5 ostatnich wyników danego użytkownika (posortowane od najnowszego).
+    """
+    results = (
+        db.query(NBackResult)
+        .filter(NBackResult.user_id == user_dict["uid"])
+        .order_by(NBackResult.submitted_at.desc())
+        .limit(5)
+        .all()
+    )
+    return results

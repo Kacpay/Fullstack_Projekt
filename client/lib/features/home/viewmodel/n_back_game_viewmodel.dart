@@ -21,6 +21,8 @@ class NBackGameRemoteViewModel {
 
   NBackGameRemoteViewModel(this.repo, this.user);
 
+  /// Zapisuje wynik do API (POST), a jeśli już istnieje – aktualizuje go (PUT).
+  /// Zwraca komunikat tekstowy o wyniku operacji.
   Future<String> saveOrUpdateResult(GameResultModel result) async {
     if (user == null) return 'Brak użytkownika';
     final addRes = await repo.addResult(result: result, token: user!.token);
@@ -32,7 +34,7 @@ class NBackGameRemoteViewModel {
             case Left(value: final updateFailure):
               return 'Błąd aktualizacji: ${updateFailure.message}';
             case Right(value: final updated):
-              return 'Wynik zaktualizowany: $updated';
+              return 'Przesłano wynik, obecny najlepszy wynik to: $updated';
           }
         } else {
           return 'Błąd dodawania: ${failure.message}';
@@ -54,16 +56,17 @@ class NBackGameViewModel {
   int score = 0;
 
   NBackGameViewModel({this.level = 1}) {
-    sequenceLength = 20 + level;
+    sequenceLength = 10 + level;
     generateSequence();
   }
 
+  /// Generuje nową sekwencję liter i pozycji do gry n-back.
   void generateSequence() {
     final rand = Random();
     List<String> letters = List.filled(sequenceLength, '');
     List<int> positions = List.filled(sequenceLength, 0);
 
-    // Wypełnij pierwsze "level" losowo
+    // Wypełnij pierwsze n sekwencji losowo
     for (int i = 0; i < level; i++) {
       letters[i] = possibleLetters[rand.nextInt(possibleLetters.length)];
       positions[i] = rand.nextInt(gridSize);
@@ -102,17 +105,23 @@ class NBackGameViewModel {
     score = 0;
   }
 
+  /// Zwraca aktualną literę w sekwencji.
   String get currentLetter => sequence.letters[currentStep];
+
+  /// Zwraca aktualną pozycję w sekwencji.
   int get currentPosition => sequence.positions[currentStep];
 
+  /// Sprawdza, czy można już sprawdzać zgodność (czy minęło wystarczająco kroków).
   bool canCheckMatch() => currentStep >= level;
 
+  /// Przechodzi do następnego kroku w sekwencji.
   void nextStep() {
     if (currentStep < sequenceLength - 1) {
       currentStep++;
     }
   }
 
+  /// Sprawdza zgodność pozycji i aktualizuje wynik, jeśli odpowiedź była poprawna.
   bool checkPositionMatch({required bool userClicked}) {
     if (!canCheckMatch()) return false;
     bool match = sequence.positions[currentStep] == sequence.positions[currentStep - level];
@@ -122,6 +131,7 @@ class NBackGameViewModel {
     return match;
   }
 
+  /// Sprawdza zgodność litery i aktualizuje wynik, jeśli odpowiedź była poprawna.
   bool checkLetterMatch({required bool userClicked}) {
     if (!canCheckMatch()) return false;
     bool match = sequence.letters[currentStep] == sequence.letters[currentStep - level];
@@ -131,15 +141,16 @@ class NBackGameViewModel {
     return match;
   }
 
+  /// Sprawdza, czy gra się zakończyła.
   bool isFinished() => currentStep >= sequenceLength - 1;
 
   /// Aktualizuje poziom w zależności od wyniku.
   /// Zwraca nowy SettingsModel z odpowiednim currentLevel.
   SettingsModel updateLevel(SettingsModel settings) {
     int newLevel = settings.currentLevel;
-    if (score >= 36) {
+    if (score >= 18) {
       newLevel += 1;
-    } else if (score < 32 && newLevel > 1) {
+    } else if (score < 16 && newLevel > 1) {
       newLevel -= 1;
     }
     return settings.copyWith(currentLevel: newLevel);

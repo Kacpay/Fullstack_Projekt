@@ -18,16 +18,16 @@ class GameResultModel {
       'userId': userId,
       'score': score,
       'submittedAt': submittedAt.toIso8601String(),
-      'level': level, // Dodano poziom
+      'level': level,
     };
   }
 
   factory GameResultModel.fromMap(Map<String, dynamic> map) {
     return GameResultModel(
-      userId: map['userId'] ?? '',
+      userId: map['userId'] ?? map['user_id'] ?? '',
       score: map['score'] ?? 0,
-      submittedAt: DateTime.parse(map['submittedAt']),
-      level: map['level'] ?? 1, // Dodano poziom
+      submittedAt: DateTime.parse(map['submittedAt'] ?? map['submitted_at']),
+      level: map['level'] ?? 1,
     );
   }
 

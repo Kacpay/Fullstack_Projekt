@@ -69,4 +69,29 @@ class HomeRemoteRepository {
       return Left(AppFailure(e.toString()));
     }
   }
+
+  Future<Either<AppFailure, List<GameResultModel>>> getRecentResults({
+    required String token,
+  }) async {
+    try {
+      final response = await http.get(
+        Uri.parse('${ServerConstants.serverURL}/nback/recent'),
+        headers: {
+          'Content-Type': 'application/json',
+          'x-auth-token': token,
+        },
+      );
+      if (response.statusCode != 200) {
+        final resBodyMap = jsonDecode(response.body) as Map<String, dynamic>;
+        return Left(AppFailure(resBodyMap['detail'] ?? 'Błąd pobierania wyników'));
+      }
+      final resBodyList = jsonDecode(response.body) as List<dynamic>;
+      final results = resBodyList
+          .map((e) => GameResultModel.fromMap(e as Map<String, dynamic>))
+          .toList();
+      return Right(results);
+    } catch (e) {
+      return Left(AppFailure(e.toString()));
+    }
+  }
 }
