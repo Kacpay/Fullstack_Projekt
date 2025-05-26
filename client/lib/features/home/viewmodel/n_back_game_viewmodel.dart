@@ -1,6 +1,47 @@
 import 'dart:math';
+import 'package:client/core/providers/current_user_notifier.dart';
+import 'package:client/features/auth/model/user_model.dart';
+import 'package:client/features/home/model/game_result_model.dart';
+import 'package:client/features/home/repositories/home_remote_repository.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fpdart/fpdart.dart';
 import '../model/n_back_sequence.dart';
 import '../model/settings_model.dart';
+
+final nBackGameRemoteViewModelProvider = Provider<NBackGameRemoteViewModel>((ref) {
+  return NBackGameRemoteViewModel(
+    ref.read(homeRemoteRepositoryProvider),
+    ref.read(currentUserNotifierProvider),
+  );
+});
+
+class NBackGameRemoteViewModel {
+  final HomeRemoteRepository repo;
+  final UserModel? user;
+
+  NBackGameRemoteViewModel(this.repo, this.user);
+
+  Future<String> saveOrUpdateResult(GameResultModel result) async {
+    if (user == null) return 'Brak użytkownika';
+    final addRes = await repo.addResult(result: result, token: user!.token);
+    switch (addRes) {
+      case Left(value: final failure):
+        if (failure.message.contains('already exists') || failure.message.contains('istnieje')) {
+          final updateRes = await repo.updateResult(result: result, token: user!.token);
+          switch (updateRes) {
+            case Left(value: final updateFailure):
+              return 'Błąd aktualizacji: ${updateFailure.message}';
+            case Right(value: final updated):
+              return 'Wynik zaktualizowany: $updated';
+          }
+        } else {
+          return 'Błąd dodawania: ${failure.message}';
+        }
+      case Right(value: final added):
+        return 'Wynik dodany: $added';
+    }
+  }
+}
 
 class NBackGameViewModel {
   final int level;

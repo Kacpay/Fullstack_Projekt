@@ -124,6 +124,10 @@ class _NBackGamePageState extends ConsumerState<NBackGamePage> {
 
     await homeRepo.saveSettings(updatedSettings);
 
+    final remoteViewModel = ref.read(nBackGameRemoteViewModelProvider);
+    final msg = await remoteViewModel.saveOrUpdateResult(result);
+    debugPrint(msg);
+
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
