@@ -1,4 +1,5 @@
 import 'package:client/core/providers/current_user_notifier.dart';
+import 'package:client/core/theme/app_pallete.dart';
 import 'package:client/features/home/model/game_result_model.dart';
 import 'package:client/features/home/repositories/home_remote_repository.dart';
 import 'package:flutter/material.dart';
@@ -38,16 +39,23 @@ class _NBackStatsPageState extends ConsumerState<NBackStatsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Ostatnie wyniki')),
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        title: const Text('Last Results', style: TextStyle(color: Colors.white)),
+        backgroundColor: Colors.black,
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
       body: FutureBuilder<List<GameResultModel>>(
         future: _recentResultsFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState != ConnectionState.done) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator(color: Colors.white));
           }
           final results = snapshot.data ?? [];
           if (results.isEmpty) {
-            return const Center(child: Text('Brak wyników do wyświetlenia.'));
+            return const Center(
+              child: Text('No data to display.', style: TextStyle(color: Colors.white)),
+            );
           }
           results.sort((a, b) => a.submittedAt.compareTo(b.submittedAt));
           return Padding(
@@ -55,8 +63,8 @@ class _NBackStatsPageState extends ConsumerState<NBackStatsPage> {
             child: Column(
               children: [
                 const Text(
-                  'Ostatnie 5 wyników',
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                  'Last 5 Results',
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
                 ),
                 const SizedBox(height: 24),
                 SizedBox(
@@ -74,7 +82,7 @@ class _NBackStatsPageState extends ConsumerState<NBackStatsPage> {
                             return BarTooltipItem(
                               '$value',
                               TextStyle(
-                                color: Theme.of(context).colorScheme.primary,
+                                color: Pallete.gradient1,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,
                               ),
@@ -82,8 +90,16 @@ class _NBackStatsPageState extends ConsumerState<NBackStatsPage> {
                           },
                         ),
                       ),
-                      gridData: FlGridData(show: true),
-                      borderData: FlBorderData(show: true),
+                      gridData: FlGridData(show: true, drawHorizontalLine: true, horizontalInterval: 10, getDrawingHorizontalLine: (value) {
+                        return FlLine(color: Colors.white12, strokeWidth: 1);
+                      }),
+                      borderData: FlBorderData(
+                        show: true,
+                        border: const Border(
+                          left: BorderSide(color: Colors.white24),
+                          bottom: BorderSide(color: Colors.white24),
+                        ),
+                      ),
                       titlesData: FlTitlesData(
                         leftTitles: AxisTitles(
                           sideTitles: SideTitles(showTitles: false),
@@ -97,7 +113,10 @@ class _NBackStatsPageState extends ConsumerState<NBackStatsPage> {
                               final date = results[idx].submittedAt;
                               return Padding(
                                 padding: const EdgeInsets.only(top: 8.0),
-                                child: Text('${date.day}.${date.month}'),
+                                child: Text(
+                                  '${date.day}.${date.month}',
+                                  style: const TextStyle(color: Colors.white70),
+                                ),
                               );
                             },
                           ),
@@ -117,7 +136,7 @@ class _NBackStatsPageState extends ConsumerState<NBackStatsPage> {
                             barRods: [
                               BarChartRodData(
                                 toY: (results[i].level * 10 + results[i].score).toDouble(),
-                                color: Theme.of(context).colorScheme.primary,
+                                color: Pallete.gradient1,
                                 width: 24,
                                 borderRadius: BorderRadius.circular(6),
                               ),
@@ -135,9 +154,21 @@ class _NBackStatsPageState extends ConsumerState<NBackStatsPage> {
                     itemBuilder: (context, i) {
                       final r = results[i];
                       return ListTile(
-                        leading: CircleAvatar(child: Text('${r.score}')),
-                        title: Text('Poziom: ${r.level}'),
-                        subtitle: Text('Data: ${r.submittedAt.day}.${r.submittedAt.month}.${r.submittedAt.year}'),
+                        leading: CircleAvatar(
+                          backgroundColor: Pallete.gradient2,
+                          child: Text(
+                            '${r.score}',
+                            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        title: Text(
+                          'Level: ${r.level}',
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                        subtitle: Text(
+                          'Date: ${r.submittedAt.day}.${r.submittedAt.month}.${r.submittedAt.year}',
+                          style: const TextStyle(color: Colors.white70),
+                        ),
                       );
                     },
                   ),

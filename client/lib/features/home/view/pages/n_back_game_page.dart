@@ -5,6 +5,7 @@ import '../../model/game_result_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:client/core/providers/current_user_notifier.dart';
 import 'package:client/features/home/repositories/home_local_repository.dart';
+import 'package:client/core/theme/app_pallete.dart';
 
 class NBackGamePage extends ConsumerStatefulWidget {
   const NBackGamePage({super.key});
@@ -131,15 +132,15 @@ class _NBackGamePageState extends ConsumerState<NBackGamePage> {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Koniec gry'),
-        content: Text('Twój wynik: ${viewModel!.score}'),
+        title: const Text('Session Ended'),
+        content: Text('Score: ${viewModel!.score}'),
         actions: [
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
               _initGame();
             },
-            child: const Text('Zagraj ponownie'),
+            child: const Text('Play Again'),
           ),
         ],
       ),
@@ -160,6 +161,8 @@ class _NBackGamePageState extends ConsumerState<NBackGamePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Dual N-Back Game'),
+        backgroundColor: Colors.black,
+        foregroundColor: Colors.white,
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -174,13 +177,14 @@ class _NBackGamePageState extends ConsumerState<NBackGamePage> {
           ),
         ],
       ),
+      backgroundColor: Colors.black,
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
             Text(
               'Level: ${viewModel!.level}',
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
             ),
             const SizedBox(height: 16),
             Expanded(
@@ -197,8 +201,8 @@ class _NBackGamePageState extends ConsumerState<NBackGamePage> {
                   return Container(
                     decoration: BoxDecoration(
                       color: isActive
-                          ? Theme.of(context).colorScheme.primary.withOpacity(0.5)
-                          : Colors.grey.withOpacity(0.2),
+                          ? Pallete.gradient2.withOpacity(0.7)
+                          : Colors.white.withOpacity(0.08),
                       borderRadius: BorderRadius.circular(12),
                     ),
                   );
@@ -208,7 +212,7 @@ class _NBackGamePageState extends ConsumerState<NBackGamePage> {
             const SizedBox(height: 12),
             Text(
               viewModel!.currentLetter,
-              style: const TextStyle(fontSize: 64, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 64, fontWeight: FontWeight.bold, color: Colors.white),
             ),
             const SizedBox(height: 24),
             Row(
@@ -218,10 +222,17 @@ class _NBackGamePageState extends ConsumerState<NBackGamePage> {
                   child: SizedBox(
                     height: 60,
                     child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Pallete.gradient1,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        elevation: 4,
+                      ),
                       onPressed: (viewModel!.canCheckMatch() && !positionClicked) ? _handlePositionMatch : null,
                       child: const Text(
                         'Position Match',
-                        style: TextStyle(fontSize: 20),
+                        style: TextStyle(fontSize: 20, color: Colors.white),
                       ),
                     ),
                   ),
@@ -231,10 +242,17 @@ class _NBackGamePageState extends ConsumerState<NBackGamePage> {
                   child: SizedBox(
                     height: 60,
                     child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Pallete.gradient1,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        elevation: 4,
+                      ),
                       onPressed: (viewModel!.canCheckMatch() && !letterClicked) ? _handleLetterMatch : null,
                       child: const Text(
                         'Letter Match',
-                        style: TextStyle(fontSize: 20),
+                        style: TextStyle(fontSize: 20, color: Colors.white),
                       ),
                     ),
                   ),
@@ -244,12 +262,12 @@ class _NBackGamePageState extends ConsumerState<NBackGamePage> {
             const SizedBox(height: 24),
             Text(
               'Score: ${viewModel!.score}',
-              style: const TextStyle(fontSize: 20),
+              style: const TextStyle(fontSize: 20, color: Colors.white),
             ),
             const SizedBox(height: 12),
             Text(
               'Krok: ${viewModel!.currentStep + 1} / ${viewModel!.sequenceLength}',
-              style: const TextStyle(fontSize: 16),
+              style: const TextStyle(fontSize: 16, color: Colors.white70),
             ),
           ],
         ),
