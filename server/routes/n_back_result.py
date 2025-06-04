@@ -109,3 +109,20 @@ def get_recent_n_back_results(
         .all()
     )
     return results
+
+@router.get("/recent/{username}", response_model=list[NBackResultOut])
+def get_recent_results_by_username(
+    username: str,
+    db: Session = Depends(get_db)
+):
+    user = db.query(User).filter(User.name == username).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    results = (
+        db.query(NBackResult)
+        .filter(NBackResult.user_id == user.id)
+        .order_by(NBackResult.submitted_at.desc())
+        .limit(5)
+        .all()
+    )
+    return results

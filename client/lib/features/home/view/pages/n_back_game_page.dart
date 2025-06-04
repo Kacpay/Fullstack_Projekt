@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import '../../viewmodel/n_back_game_viewmodel.dart';
 import '../../model/game_result_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -17,6 +18,7 @@ class NBackGamePage extends ConsumerStatefulWidget {
 class _NBackGamePageState extends ConsumerState<NBackGamePage> {
   NBackGameViewModel? viewModel;
   Timer? _timer;
+  final FlutterTts _tts = FlutterTts(); // Dodaj TTS
 
   // Śledzenie kliknięć użytkownika w danym kroku
   bool positionClicked = false;
@@ -28,6 +30,23 @@ class _NBackGamePageState extends ConsumerState<NBackGamePage> {
   void initState() {
     super.initState();
     _initGame();
+    _initTts();
+  }
+
+  Future<void> _initTts() async {
+    await _tts.setLanguage('en-US');
+    await _tts.setSpeechRate(0.5);
+    await _tts.setVolume(1.0);
+    await _tts.setPitch(1.0);
+  }
+
+  // Dodaj wywołanie TTS przy każdej zmianie litery
+  void _speakCurrentLetter() {
+    final letter = viewModel?.currentLetter;
+    if (letter != null && letter.isNotEmpty) {
+      _tts.stop();
+      _tts.speak(letter);
+    }
   }
 
   Future<void> _initGame() async {
@@ -36,6 +55,7 @@ class _NBackGamePageState extends ConsumerState<NBackGamePage> {
     setState(() {
       viewModel = NBackGameViewModel(level: settings.currentLevel);
     });
+    _speakCurrentLetter(); // Odtwórz dźwięk pierwszej litery
     _startStepTimer();
   }
 
@@ -50,6 +70,7 @@ class _NBackGamePageState extends ConsumerState<NBackGamePage> {
           viewModel!.nextStep();
           _resetClicks();
         });
+        _speakCurrentLetter(); // Odtwórz dźwięk nowej litery
       } else {
         _timer?.cancel();
         _showEndDialog();
@@ -150,6 +171,7 @@ class _NBackGamePageState extends ConsumerState<NBackGamePage> {
   @override
   void dispose() {
     _timer?.cancel();
+    _tts.stop();
     super.dispose();
   }
 
@@ -266,7 +288,7 @@ class _NBackGamePageState extends ConsumerState<NBackGamePage> {
             ),
             const SizedBox(height: 12),
             Text(
-              'Krok: ${viewModel!.currentStep + 1} / ${viewModel!.sequenceLength}',
+              'Step: ${viewModel!.currentStep + 1} / ${viewModel!.sequenceLength}',
               style: const TextStyle(fontSize: 16, color: Colors.white70),
             ),
           ],
